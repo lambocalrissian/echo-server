@@ -14,7 +14,7 @@ def server(log_buffer=sys.stderr):
     #       in class. Find the correct option by reading the very end of the
     #       socket library documentation:
     #       http://docs.python.org/3/library/socket.html#example
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(address)
 
     # log that we are building a server
@@ -22,7 +22,7 @@ def server(log_buffer=sys.stderr):
 
     # TODO: bind your new sock 'sock' to the address above and begin to listen
     #       for incoming connections
-    sock.listen(5)
+    sock.listen(2)
 
     try:
         # the outer loop controls the creation of new connection sockets. The
@@ -51,17 +51,13 @@ def server(log_buffer=sys.stderr):
 
                     data = conn.recv(16)
 
-                    """Moved received data check """
-                    if not data:
-                        break
-
                     print('received "{0}"'.format(data.decode('utf8')))
                     
                     # TODO: Send the data you received back to the client, log
                     # the fact using the print statement here.  It will help in
                     # debugging problems.
-                    data = conn.send(data)
-                    print('sent "{0}"'.format(data.decode('utf8')))
+
+                    # print('sent "{0}"'.format(data.decode('utf8')))
                     
                     # TODO: Check here to see whether you have received the end
                     # of the message. If you have, then break from the `while True`
@@ -70,8 +66,12 @@ def server(log_buffer=sys.stderr):
                     # Figuring out whether or not you have received the end of the
                     # message is a trick we learned in the lesson: if you don't
                     # remember then ask your classmates or instructor for a clue.
-                    # :)
-                    """Moved to line 56"""
+                    if data:
+                        conn.sendall(data)
+                        print('sent "{0}"'.format(data.decode('utf8')))
+                    else:
+                        print('no data from', addr)
+                        break
 
             finally:
                 # TODO: When the inner loop exits, this 'finally' clause will
@@ -82,13 +82,14 @@ def server(log_buffer=sys.stderr):
                 )
                 conn.close()
 
+
     except KeyboardInterrupt:
         # TODO: Use the python KeyboardInterrupt exception as a signal to
         #       close the server socket and exit from the server function.
         #       Replace the call to `pass` below, which is only there to
         #       prevent syntax problems
         print('quitting echo server', file=log_buffer)
-        sys.exit(0)
+        exit(0)
 
 
 if __name__ == '__main__':

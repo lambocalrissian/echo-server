@@ -3,7 +3,7 @@ import sys
 
 
 def client(msg, log_buffer=sys.stderr):
-    server_address = ('localhost', 10000)
+    server_address = ('127.0.0.1', 10000)
     # TODO: Replace the following line with your code which will instantiate
     #       a TCP socket with IPv4 Addressing, call the socket you make 'sock'
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
@@ -13,14 +13,14 @@ def client(msg, log_buffer=sys.stderr):
 
     # you can use this variable to accumulate the entire message received back
     # from the server
-    received_message = ''
+    received_message = b''
 
     # this try/finally block exists purely to allow us to close the socket
     # when we are finished with it
     try:
         print('sending "{0}"'.format(msg), file=log_buffer)
         # TODO: send your message to the server here.
-        sock.sendall(b'This is Major Tom to ground control')
+        sock.sendall(msg.encode('utf-8'))
 
         # TODO: the server should be sending you back your message as a series
         #       of 16-byte chunks. Accumulate the chunks you get to build the
@@ -29,9 +29,19 @@ def client(msg, log_buffer=sys.stderr):
         #
         #       Log each chunk you receive.  Use the print statement below to
         #       do it. This will help in debugging problems
-        chunk = sock.recv(16)
-        received_message += chunk + '\n'
-        print('received "{0}"'.format(chunk.decode('utf8')), file=log_buffer)
+
+        # Look for the response
+        amount_received = 0
+        amount_expected = len(msg)
+
+        while amount_received < amount_expected:
+            data = sock.recv(16)
+            amount_received += len(data)
+            received_message += data
+
+            print('received "{0}"'.format(data.decode('utf8')), file=log_buffer)
+            # print('received {!r}'.format(data))
+
     finally:
         # TODO: after you break out of the loop receiving echoed chunks from
         #       the server you will want to close your client socket.
@@ -41,7 +51,7 @@ def client(msg, log_buffer=sys.stderr):
         # you received from the server as the return value of this function.
         sock.close()
         print('Complete Message "{0}"'.format(received_message.decode('utf8')), file=log_buffer)
-
+        
     return received_message
 
 
