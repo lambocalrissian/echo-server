@@ -52,7 +52,7 @@ def client(msg, log_buffer=sys.stderr):
         sock.close()
         print('Complete Message "{0}"'.format(received_message.decode('utf8')), file=log_buffer)
 
-    return received_message
+    return received_message.decode('utf-8')
 
 
 if __name__ == '__main__':
