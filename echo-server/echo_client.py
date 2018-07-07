@@ -51,7 +51,7 @@ def client(msg, log_buffer=sys.stderr):
         # you received from the server as the return value of this function.
         sock.close()
         print('Complete Message "{0}"'.format(received_message.decode('utf8')), file=log_buffer)
-        
+
     return received_message
 
 
